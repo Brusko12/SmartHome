@@ -1,4 +1,5 @@
 import asyncio
+import secrets
 import threading
 from contextlib import asynccontextmanager
 
@@ -8,6 +9,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from app import __version__
 from app.adapters.registry import AdapterRegistry
 from app.api.errors import install_error_handlers
+from app.api.frontend import install_frontend
 from app.api.router import router
 from app.api.security import install_security
 from app.core.config import Settings
@@ -56,8 +58,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             lock.release()
 
     app = FastAPI(title="SmartHome", version=__version__, lifespan=lifespan)
+    app.state.instance_id = secrets.token_urlsafe(16)
+    app.state.shutdown_callback = None
     install_security(app)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost"])
     install_error_handlers(app)
     app.include_router(router)
+    install_frontend(app, configuration.frontend_dir)
     return app

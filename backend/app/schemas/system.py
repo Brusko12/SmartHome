@@ -59,6 +59,7 @@ class SystemStatus(BaseModel):
     runtime_running: bool
     last_runtime_error: str | None
     recent_errors: list[EventRead]
+    can_shutdown: bool
 
 
 class ConfirmInput(BaseModel):

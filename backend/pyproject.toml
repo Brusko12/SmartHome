@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=75,<83"]
+requires = ["setuptools>=75,<85"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "smarthome-backend"
 version = "0.1.0"
-description = "Local SmartHome backend — rooms and virtual devices"
+description = "Local SmartHome backend with persistent virtual devices and automations"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115,<1",
@@ -19,6 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<10", "httpx2>=2,<3", "ruff>=0.9,<1"]
+build = ["pyinstaller>=6.11,<7"]
 
 [tool.setuptools.packages.find]
 include = ["app*"]

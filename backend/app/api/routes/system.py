@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.api.dependencies import SessionDep
 from app.api.errors import ERROR_RESPONSES
+from app.core.errors import Conflict
 from app.schemas.system import (
     DatabaseStatus,
     EventPage,
@@ -17,6 +18,19 @@ from app.schemas.system import (
 from app.services import system
 
 router = APIRouter(tags=["system"], responses=ERROR_RESPONSES)
+
+
+class ShutdownRead(BaseModel):
+    stopping: bool
+
+
+@router.post("/system/shutdown", response_model=ShutdownRead)
+def shutdown(request: Request, session: SessionDep):
+    callback = request.app.state.shutdown_callback
+    if callback is None:
+        raise Conflict("Этот сервер запущен в режиме разработки; завершите его в терминале.")
+    callback()
+    return {"stopping": True}
 
 
 class EventDevice(BaseModel):

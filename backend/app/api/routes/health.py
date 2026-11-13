@@ -16,6 +16,8 @@ def health(
     response: Response,
     session: Annotated[Session, Depends(get_session)],
 ) -> HealthResponse:
+    response.headers["X-SmartHome"] = "SmartHome"
+    response.headers["X-SmartHome-Instance"] = request.app.state.instance_id
     result = check_health(session, request.app.state.expected_revision)
     if result.status != "ok":
         response.status_code = 503

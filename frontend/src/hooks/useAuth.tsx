@@ -7,6 +7,7 @@ type User = { id: number; username: string };
 const Context = createContext<{
   user: User;
   refresh: (message?: string) => Promise<void>;
+  finish: () => void;
 } | null>(null);
 export function AuthBoundary({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null),
@@ -14,6 +15,7 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
     [notice, setNotice] = useState("");
+  const [stopped, setStopped] = useState(false);
   async function refresh(message = "") {
     setLoading(true);
     setError("");
@@ -44,6 +46,15 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
     window.addEventListener("smarthome-auth-expired", expired);
     return () => window.removeEventListener("smarthome-auth-expired", expired);
   }, []);
+  if (stopped)
+    return (
+      <div className="auth-screen">
+        <div className="auth-card">
+          <h1>SmartHome завершает работу</h1>
+          <p className="muted">Данные сохранены. Эту вкладку можно закрыть.</p>
+        </div>
+      </div>
+    );
   if (loading)
     return (
       <div className="auth-screen">
@@ -75,7 +86,9 @@ export function AuthBoundary({ children }: { children: ReactNode }) {
       />
     );
   return (
-    <Context.Provider value={{ user, refresh }}>{children}</Context.Provider>
+    <Context.Provider value={{ user, refresh, finish: () => setStopped(true) }}>
+      {children}
+    </Context.Provider>
   );
 }
 function LoginPage({

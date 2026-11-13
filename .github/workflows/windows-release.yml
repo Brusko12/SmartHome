@@ -1,0 +1,29 @@
+name: Windows portable build
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -c backend/requirements.lock -e "./backend[dev,build]"
+      - shell: pwsh
+        run: ./scripts/build_windows.ps1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SmartHome-Windows
+          path: |
+            release/SmartHome-Windows.zip
+            release/windows-check.json
+          if-no-files-found: warn

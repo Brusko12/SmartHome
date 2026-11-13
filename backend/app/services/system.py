@@ -171,4 +171,5 @@ def system_status(session, state):
         runtime_running=bool(task and not task.done()),
         last_runtime_error=state.runtime.last_error,
         recent_errors=[EventRead.model_validate(e) for e in errors],
+        can_shutdown=state.shutdown_callback is not None,
     )

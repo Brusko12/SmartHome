@@ -56,6 +56,7 @@ type Status = {
   events: number;
   runtime_running: boolean;
   last_runtime_error: string | null;
+  can_shutdown: boolean;
   recent_errors: EventRow[];
 };
 const sources: Record<string, string> = {
@@ -783,6 +784,8 @@ export function HistoryPage() {
 }
 
 export function SystemPage() {
+  const auth = useAuth();
+  const [stopError, setStopError] = useState("");
   const { home } = useHome();
   const { data, error, refresh } = useObject<Status>(
     "/system/status",
@@ -803,9 +806,9 @@ export function SystemPage() {
           Проверить
         </button>
       </div>
-      {error && (
+      {(error || stopError) && (
         <p className="error" role="alert">
-          {error}
+          {error || stopError}
         </p>
       )}
       {!data ? (
@@ -855,6 +858,21 @@ export function SystemPage() {
               <dt>Последняя фоновая ошибка</dt>
               <dd>{data.last_runtime_error ?? "Нет"}</dd>
             </dl>
+            {data.can_shutdown && (
+              <button
+                className="danger"
+                onClick={async () => {
+                  try {
+                    await api("/system/shutdown", "POST", {});
+                    auth.finish();
+                  } catch (e) {
+                    setStopError((e as Error).message);
+                  }
+                }}
+              >
+                Завершить SmartHome
+              </button>
+            )}
           </section>
           <div className="section-heading">
             <h2>Последние ошибки</h2>
