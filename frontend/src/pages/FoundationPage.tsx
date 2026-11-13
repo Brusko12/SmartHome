@@ -15,13 +15,13 @@ export function FoundationPage() {
           <span className="rounded-2xl bg-violet-500/15 p-3 text-violet-300"><House aria-hidden="true" /></span>
           <span className="text-xl font-semibold tracking-tight">SmartHome</span>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">Этап 1 · Основа</span>
+        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">Этап 2 · API</span>
       </header>
 
       <section className="my-auto py-16">
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-violet-300">Локальный умный дом</p>
         <h1 className="max-w-2xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Всё начинается<br />с надёжной основы.</h1>
-        <p className="mt-5 max-w-xl leading-7 text-slate-400">Первый этап SmartHome: подключение интерфейса к серверу и постоянной базе данных. Управление устройствами появится на следующих этапах.</p>
+        <p className="mt-5 max-w-xl leading-7 text-slate-400">Комнаты и виртуальные устройства доступны через локальный API. Интерфейс управления появится на этапе 3.</p>
 
         <section aria-label="Проверка работоспособности" className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">

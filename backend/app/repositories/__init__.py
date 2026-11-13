@@ -1,1 +1,1 @@
-"""Database queries. Add entity repositories alongside stage 2 operations."""
+"""Persistence queries for health checks, rooms and devices."""

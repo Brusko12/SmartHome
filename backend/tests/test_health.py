@@ -45,5 +45,5 @@ def test_health_detects_revision_mismatch(settings):
 
 def test_unknown_routes_are_not_fake_successes_and_external_hosts_are_rejected(settings):
     with TestClient(create_app(settings), base_url="http://127.0.0.1") as client:
-        assert client.get("/api/devices").status_code == 404
+        assert client.get("/api/unimplemented").status_code == 404
         assert client.get("/api/health", headers={"Host": "untrusted.example"}).status_code == 400

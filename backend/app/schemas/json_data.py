@@ -4,8 +4,8 @@ from pydantic import AfterValidator, ConfigDict, Field, JsonValue, TypeAdapter
 from sqlalchemy import JSON
 from sqlalchemy.types import TypeDecorator
 
-# Strict JSON validation is shared by all writes through the ORM. Device-specific
-# commands and rule semantics will be added with their respective services.
+# Strict JSON validation is shared by all ORM writes. Device-specific validation
+# also runs in adapters; rule semantics will be added with the automation service.
 JsonObject = dict[str, JsonValue]
 config = ConfigDict(strict=True, allow_inf_nan=False)
 

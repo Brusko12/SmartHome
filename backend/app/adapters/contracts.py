@@ -1,19 +1,33 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 from pydantic import JsonValue
 
 
-class DeviceAdapter(Protocol):
-    """Transport boundary. Services own validation, persistence and event logging."""
+@dataclass(frozen=True)
+class DeviceSnapshot:
+    """Persisted data supplied by services; adapters do not own a state store."""
 
+    device_id: int
+    device_type: str
+    parameters: dict[str, JsonValue]
+    values: dict[str, JsonValue]
+
+
+class DeviceAdapter(Protocol):
     def connect(self) -> None: ...
 
     def disconnect(self) -> None: ...
 
-    def get_state(self, device_id: int) -> dict[str, JsonValue]: ...
+    def validate_parameters(self, device_type: str, parameters: dict) -> dict: ...
+
+    def initial_state(self, device_type: str) -> dict: ...
+
+    def get_state(self, device: DeviceSnapshot) -> dict: ...
 
     def execute_command(
-        self, device_id: int, command: str, params: dict[str, JsonValue]
-    ) -> dict[str, JsonValue]: ...
+        self, device: DeviceSnapshot, command: str, params: dict, now: datetime
+    ) -> dict: ...
 
     def get_connection_status(self) -> bool: ...
