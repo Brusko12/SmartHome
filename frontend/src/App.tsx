@@ -2,6 +2,7 @@ import { Link, Route, Routes } from "react-router";
 import { HomeProvider } from "./hooks/useHome";
 import { AppLayout } from "./layouts/AppLayout";
 import { DashboardPage, RoomsPage, DevicesPage } from "./pages/HomePages";
+import { AutomationsPage } from "./pages/AutomationsPage";
 
 export function App() {
   return (
@@ -11,6 +12,7 @@ export function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/devices" element={<DevicesPage />} />
+          <Route path="/automations" element={<AutomationsPage />} />
           <Route
             path="*"
             element={

@@ -823,3 +823,128 @@ dialog .error {
     margin: 0 8px;
   }
 }
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.check input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.editor-section {
+  border-top: 1px solid var(--line);
+}
+.action-row,
+.condition-row {
+  padding: 16px;
+  border: 1px solid #ffffff10;
+  background: #11141c;
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.action-row .row select {
+  flex: 1;
+}
+.step-number {
+  font-size: 12px;
+  color: var(--accent);
+}
+.condition-row {
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+.trigger-editor {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #a184f722;
+  border-radius: 12px;
+}
+.weekdays {
+  border: 0;
+  padding: 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.weekdays legend {
+  font-size: 12px;
+  color: #9ca3b8;
+  margin-bottom: 12px;
+}
+.weekdays label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+.weekdays input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+dialog:has(.automation-builder) {
+  width: min(760px, calc(100% - 28px));
+}
+.automation-grid,
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.automation-card {
+  padding: 22px;
+}
+.automation-card h2 {
+  margin: 20px 0 12px;
+}
+.automation-card .row {
+  flex-wrap: wrap;
+}
+.automation-card .row .check {
+  margin-left: auto;
+  font-size: 10px;
+}
+.automation-card .updated {
+  margin: 14px 0 22px;
+}
+.scenario-quick {
+  padding: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.scenario-quick > svg {
+  color: var(--accent);
+}
+.scenario-quick h3 {
+  margin-right: auto;
+  font-size: 13px;
+}
+@media (max-width: 720px) {
+  .automation-grid,
+  .scenario-grid {
+    grid-template-columns: 1fr;
+  }
+  .condition-row {
+    grid-template-columns: 1fr;
+  }
+  .scenario-quick {
+    flex-wrap: wrap;
+  }
+  .action-row {
+    padding: 12px;
+  }
+  .action-row .row {
+    gap: 2px;
+  }
+  .action-row .row select {
+    font-size: 11px;
+  }
+}

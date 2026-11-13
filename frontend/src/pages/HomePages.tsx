@@ -16,6 +16,7 @@ import { DeviceCard } from "../components/DeviceCard";
 import { Modal } from "../components/Modal";
 import { deviceNames } from "../types/domain";
 import type { Device, DeviceType, Room } from "../types/domain";
+import { QuickScenes } from "./AutomationsPage";
 
 export function DashboardPage() {
   const { home, dashboard: d, devices } = useHome();
@@ -52,6 +53,7 @@ export function DashboardPage() {
           );
         })}
       </div>
+      <QuickScenes />
       <div className="section-heading">
         <h2>Устройства дома</h2>
         <Link to="/devices">
@@ -150,7 +152,11 @@ function RoomForm({ room, onClose }: { room?: Room; onClose: () => void }) {
         </label>
         <label>
           Иконка
-          <select aria-label="Иконка" name="icon" defaultValue={room?.icon ?? "house"}>
+          <select
+            aria-label="Иконка"
+            name="icon"
+            defaultValue={room?.icon ?? "house"}
+          >
             {[
               ["house", "Дом"],
               ["sofa", "Гостиная"],
@@ -205,7 +211,12 @@ function DeleteRoom({ room, onClose }: { room: Room; onClose: () => void }) {
         {room.device_count > 0 && (
           <label>
             Перенести устройства
-            <select aria-label="Перенести устройства" name="target" required defaultValue="">
+            <select
+              aria-label="Перенести устройства"
+              name="target"
+              required
+              defaultValue=""
+            >
               <option value="" disabled>
                 Выберите комнату
               </option>

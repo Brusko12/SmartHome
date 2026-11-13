@@ -93,17 +93,22 @@ class VirtualDeviceAdapter:
             state["current_power_w"] = parameters["nominal_power_w"] if state["power"] else 0.0
         return state
 
-    def execute_command(
-        self, device: DeviceSnapshot, command: str, params: dict, now: datetime
-    ) -> dict:
-        state = self.get_state(device)
-        if command not in COMMANDS.get(device.device_type, set()):
+    def validate_command(self, device_type: str, command: str, params: dict) -> dict:
+        self._require_connection()
+        if command not in COMMANDS.get(device_type, set()):
             raise InvalidCommand("Команда не поддерживается этим типом устройства.")
         schema = COMMAND_PARAMETERS.get(command, EmptyParameters)
         try:
             values = schema.model_validate(params).model_dump(mode="json")
         except ValidationError as error:
             raise InvalidCommand("Некорректные или неподдерживаемые параметры команды.") from error
+        return values
+
+    def execute_command(
+        self, device: DeviceSnapshot, command: str, params: dict, now: datetime
+    ) -> dict:
+        state = self.get_state(device)
+        values = self.validate_command(device.device_type, command, params)
         if command in {"turn_on", "turn_off"}:
             state["power"] = command == "turn_on"
         elif command == "set_brightness":

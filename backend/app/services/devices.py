@@ -171,11 +171,12 @@ def execute_command(
     adapters: AdapterRegistry,
     device_id: int,
     payload: CommandRequest,
+    context=None,
 ) -> StateRead:
     failure = None
-    result = None
     with write_transaction(session):
         device = repository.require_device(session, device_id)
+        home_id = device.home_id
         adapter = adapters.get(device.adapter_type)
         before = adapter.get_state(snapshot(device))
         now = utc_now()
@@ -184,6 +185,8 @@ def execute_command(
             if payload.command in {"simulate_motion", "reset_motion", "simulate_reading"}
             else "user"
         )
+        if context is not None and context.path:
+            source = "automation"
         try:
             after = adapter.execute_command(snapshot(device), payload.command, payload.params, now)
         except InvalidCommand as error:
@@ -224,8 +227,12 @@ def execute_command(
                 },
             )
             session.flush()
-            result = state_response(device, adapters)
+            state_response(device, adapters)
     # A rejected command commits only its error event, never a partial state.
     if failure is not None:
         raise failure
-    return result
+    from app.services.automation_engine import process_change
+
+    process_change(session.get_bind(), adapters, home_id, device_id, before, after, context)
+    session.expire_all()
+    return get_state(session, adapters, device_id)

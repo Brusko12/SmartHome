@@ -7,6 +7,7 @@ import {
   Search,
   ArrowUpRight,
   RefreshCw,
+  Zap,
 } from "lucide-react";
 import { useHome } from "../hooks/useHome";
 export function AppLayout() {
@@ -33,6 +34,10 @@ export function AppLayout() {
           <NavLink to="/devices">
             <Layers size={19} />
             Устройства
+          </NavLink>
+          <NavLink to="/automations">
+            <Zap size={19} />
+            Сценарии и правила
           </NavLink>
         </nav>
         <div className="sidebar-bottom">
