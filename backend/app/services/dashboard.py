@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 
 from app.models import Automation, Device, DeviceState, EventLog, Home, Room
 from app.repositories.entities import require_home
+from app.schemas.settings import HomeSettings
 
 
 def homes(session: Session) -> list[dict]:
     return [
-        {"id": h.id, "name": h.name, "timezone": h.timezone}
+        {
+            "id": h.id,
+            "name": h.name,
+            "timezone": h.timezone,
+            "settings": HomeSettings.model_validate(h.settings).model_dump(mode="json"),
+        }
         for h in session.scalars(select(Home).order_by(Home.id))
     ]
 
@@ -34,7 +40,11 @@ def dashboard(session: Session, home_id: int) -> dict:
             select(func.count()).select_from(Room).where(Room.home_id == home_id)
         ),
         "devices": len(rows),
-        "powered_devices": sum(state.values.get("power") is True for _, state in rows),
+        "powered_devices": sum(
+            state.values.get("power") is True
+            or (device.device_type == "thermostat" and state.values.get("mode", "Off") != "Off")
+            for device, state in rows
+        ),
         "active_automations": session.scalar(
             select(func.count())
             .select_from(Automation)

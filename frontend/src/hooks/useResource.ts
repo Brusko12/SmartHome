@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { all } from "../services/api";
+import { useHome } from "./useHome";
 export function useResource<T>(path: string | null) {
+  const { home } = useHome();
+  const poll = home?.settings?.ui_poll_interval ?? 3;
   const [items, setItems] = useState<T[]>([]);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
@@ -28,11 +31,11 @@ export function useResource<T>(path: string | null) {
   }, [path]);
   useEffect(() => {
     void refresh();
-    const timer = setInterval(() => void refresh(), 3000);
+    const timer = setInterval(() => void refresh(), poll * 1000);
     return () => {
       clearInterval(timer);
       sequence.current++;
     };
-  }, [refresh]);
+  }, [refresh, poll]);
   return { items, error, loaded, refresh };
 }

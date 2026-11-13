@@ -5,12 +5,27 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.core.errors import Conflict, DomainError, InvalidCommand, NotFound, Unavailable
+from app.core.errors import (
+    Conflict,
+    DomainError,
+    Forbidden,
+    InvalidCommand,
+    NotFound,
+    Unauthorized,
+    Unavailable,
+)
 from app.schemas.errors import ErrorResponse
 
 logger = logging.getLogger(__name__)
-STATUS_CODES = {NotFound: 404, Conflict: 409, InvalidCommand: 422, Unavailable: 503}
-ERROR_RESPONSES = {status: {"model": ErrorResponse} for status in (404, 409, 422, 503)}
+STATUS_CODES = {
+    NotFound: 404,
+    Conflict: 409,
+    InvalidCommand: 422,
+    Unavailable: 503,
+    Unauthorized: 401,
+    Forbidden: 403,
+}
+ERROR_RESPONSES = {status: {"model": ErrorResponse} for status in (401, 403, 404, 409, 422, 503)}
 
 
 def install_error_handlers(app: FastAPI) -> None:

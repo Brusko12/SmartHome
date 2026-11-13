@@ -9,10 +9,27 @@ import {
   RefreshCw,
   Zap,
   Clock,
+  History,
+  Settings,
+  Activity,
+  LogOut,
 } from "lucide-react";
 import { useHome } from "../hooks/useHome";
+import { useAuth } from "../hooks/useAuth";
+import { useState } from "react";
+import { api } from "../services/api";
 export function AppLayout() {
   const { home, loaded, error, refresh } = useHome();
+  const auth = useAuth();
+  const [logoutError, setLogoutError] = useState("");
+  async function logout() {
+    try {
+      await api("/auth/logout", "POST", {});
+      await auth.refresh("Вы вышли из SmartHome.");
+    } catch (e) {
+      setLogoutError((e as Error).message);
+    }
+  }
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -44,6 +61,18 @@ export function AppLayout() {
             <Clock size={19} />
             Расписания
           </NavLink>
+          <NavLink to="/history">
+            <History size={19} />
+            История событий
+          </NavLink>
+          <NavLink to="/settings">
+            <Settings size={19} />
+            Настройки
+          </NavLink>
+          <NavLink to="/system">
+            <Activity size={19} />
+            Состояние системы
+          </NavLink>
         </nav>
         <div className="sidebar-bottom">
           <div className="home-avatar">
@@ -54,6 +83,20 @@ export function AppLayout() {
             </div>
           </div>
           <span className="small muted">Данные остаются у вас дома.</span>
+          <button
+            className="logout-button"
+            onClick={async () => {
+              try {
+                await api("/auth/logout", "POST", {});
+                await auth.refresh("Вы вышли из SmartHome.");
+              } catch (e) {
+                setLogoutError((e as Error).message);
+              }
+            }}
+          >
+            <LogOut size={15} />
+            Выйти · {auth.user.username}
+          </button>
         </div>
       </aside>
       <div className="workspace">
@@ -68,10 +111,26 @@ export function AppLayout() {
           </Link>
           <span className={`connection ${error ? "offline" : ""}`}>
             <i />
-            {error ? "Нет соединения" : "Система доступна"}
+            {!loaded
+              ? "Подключаемся…"
+              : error
+                ? "Нет соединения"
+                : "Система доступна"}
           </span>
+          <button
+            className="mobile-logout icon-button"
+            aria-label="Выйти"
+            onClick={() => void logout()}
+          >
+            <LogOut size={17} />
+          </button>
         </header>
         <main className="main-content">
+          {logoutError && (
+            <p role="alert" className="error">
+              {logoutError}
+            </p>
+          )}
           {error && (
             <div className="error-banner" role="alert">
               {error}

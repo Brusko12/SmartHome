@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.api.dependencies import SessionDep
+from app.schemas.settings import HomeSettings
 from app.services import dashboard as service
 
 router = APIRouter(tags=["dashboard"])
@@ -11,6 +12,7 @@ class HomeRead(BaseModel):
     id: int
     name: str
     timezone: str
+    settings: HomeSettings = Field(default_factory=HomeSettings)
 
 
 class RecentEvent(BaseModel):

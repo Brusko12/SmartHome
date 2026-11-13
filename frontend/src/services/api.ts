@@ -8,6 +8,14 @@ export class ApiError extends Error {
     super(message);
   }
 }
+export function csrfToken() {
+  return decodeURIComponent(
+    document.cookie
+      .split("; ")
+      .find((v) => v.startsWith("smarthome_csrf="))
+      ?.split("=")[1] ?? "",
+  );
+}
 export async function api<T>(
   path: string,
   method = "GET",
@@ -29,6 +37,8 @@ export async function api<T>(
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) {
+    if (response.status === 401 && !path.startsWith("/auth/"))
+      window.dispatchEvent(new Event("smarthome-auth-expired"));
     let message = `Ошибка HTTP ${response.status}`;
     try {
       const data = await response.json();

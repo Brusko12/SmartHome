@@ -9,6 +9,7 @@ from app.adapters.contracts import DeviceSnapshot
 from app.adapters.registry import AdapterRegistry
 from app.adapters.virtual import VirtualDeviceAdapter
 from app.core.errors import Unavailable
+from app.core.passwords import hash_password
 from app.database.base import utc_now
 from app.main import create_app
 from app.models import DeviceState, EventLog, Home, User
@@ -20,13 +21,18 @@ from app.services.devices import execute_command
 def api(settings):
     with TestClient(create_app(settings), base_url="http://127.0.0.1") as client:
         with client.app.state.database.sessions.begin() as session:
-            user = User(username="api-test", password_hash="$test$not-a-real-password")
+            user = User(username="api-test", password_hash=hash_password("api-test-password"))
             session.add(user)
             session.flush()
             home = Home(owner_id=user.id, name="Дом", settings={"simulation_enabled": False})
             session.add(home)
             session.flush()
             client.app.state.test_home_id = home.id
+        response = client.post(
+            "/api/auth/login", json={"username": "api-test", "password": "api-test-password"}
+        )
+        assert response.status_code == 200, response.text
+        client.headers["X-CSRF-Token"] = client.cookies["smarthome_csrf"]
         yield client
 
 
@@ -211,6 +217,7 @@ def test_state_survives_new_application_instance(api, settings, make_device):
     assert response.status_code == 200, response.text
     expected = response.json()
     with TestClient(create_app(settings), base_url="http://127.0.0.1") as reopened:
+        reopened.cookies.update(api.cookies)
         assert reopened.get(f"/api/devices/{device['id']}/state").json() == expected
     assert expected["source"] == "manual_simulation"
     assert expected["values"]["last_motion_at"] is not None

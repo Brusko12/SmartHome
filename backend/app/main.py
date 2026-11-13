@@ -1,4 +1,5 @@
 import asyncio
+import threading
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,6 +9,7 @@ from app import __version__
 from app.adapters.registry import AdapterRegistry
 from app.api.errors import install_error_handlers
 from app.api.router import router
+from app.api.security import install_security
 from app.core.config import Settings
 from app.database.base import utc_now
 from app.database.initialize import expected_revision, initialize_database
@@ -31,12 +33,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 lock.acquire()
             initialize_database(configuration, database)
             app.state.database = database
+            app.state.gate = threading.Lock()
+            app.state.auth_epoch = 0
             app.state.expected_revision = expected_revision()
             adapters.connect()
             app.state.adapters = adapters
             app.state.configuration = configuration
             app.state.started_at = utc_now()
-            app.state.runtime = RuntimeWorker(database, adapters)
+            app.state.runtime = RuntimeWorker(database, adapters, gate=app.state.gate)
             app.state.runtime_task = None
             if configuration.background_tasks:
                 app.state.runtime.recover(utc_now())
@@ -52,6 +56,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             lock.release()
 
     app = FastAPI(title="SmartHome", version=__version__, lifespan=lifespan)
+    install_security(app)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost"])
     install_error_handlers(app)
     app.include_router(router)

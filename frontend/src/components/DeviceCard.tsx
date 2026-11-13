@@ -19,7 +19,7 @@ export function DeviceCard({
   device: Device;
   onEdit?: (d: Device) => void;
 }) {
-  const { rooms, act } = useHome();
+  const { rooms, act, home } = useHome();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const s = device.state.values;
@@ -259,7 +259,9 @@ export function DeviceCard({
       )}
       <p className="updated">
         Обновлено{" "}
-        {new Date(device.state.updated_at).toLocaleTimeString("ru-RU")}
+        {new Date(device.state.updated_at).toLocaleTimeString("ru-RU", {
+          timeZone: home?.timezone ?? "UTC",
+        })}
       </p>
     </article>
   );

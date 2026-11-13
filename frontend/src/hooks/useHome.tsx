@@ -31,11 +31,14 @@ export function HomeProvider({ children }: { children: ReactNode }) {
     error: "",
   });
   const sequence = useRef(0);
+  const [poll, setPoll] = useState(3);
   const refresh = useCallback(async () => {
     const current = ++sequence.current;
     try {
       const homes = await api<Home[]>("/homes");
       const home = homes[0] ?? null;
+      if (current === sequence.current)
+        setPoll(home?.settings?.ui_poll_interval ?? 3);
       const [rooms, devices, dashboard] = home
         ? await Promise.all([
             all<Room>(`/rooms?home_id=${home.id}`),
@@ -56,12 +59,12 @@ export function HomeProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     void refresh();
-    const timer = setInterval(() => void refresh(), 3000);
+    const timer = setInterval(() => void refresh(), poll * 1000);
     return () => {
       clearInterval(timer);
       sequence.current++;
     };
-  }, [refresh]);
+  }, [refresh, poll]);
   const act = useCallback(
     async (path: string, method = "POST", body?: unknown) => {
       const result = await api(path, method, body);

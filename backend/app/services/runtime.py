@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from contextlib import nullcontext
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -23,12 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 class RuntimeWorker:
-    def __init__(self, database, adapters, started_at: datetime | None = None):
+    def __init__(self, database, adapters, started_at: datetime | None = None, gate=None):
         self.database = database
         self.adapters = adapters
         self.started_at = started_at or utc_now()
         self.last_home_tick = {}
         self.last_error = None
+        self.gate = gate
 
     def recover(self, now):
         with self.database.sessions() as session, write_transaction(session):
@@ -198,7 +200,7 @@ class RuntimeWorker:
     async def run(self, stop: asyncio.Event):
         while not stop.is_set():
             try:
-                await asyncio.to_thread(self.tick, utc_now())
+                await asyncio.to_thread(self.locked_tick)
             except Exception as error:
                 self.last_error = type(error).__name__
                 logger.exception("Background runtime tick failed")
@@ -206,3 +208,7 @@ class RuntimeWorker:
                 await asyncio.wait_for(stop.wait(), timeout=0.5)
             except TimeoutError:
                 pass
+
+    def locked_tick(self):
+        with self.gate if self.gate is not None else nullcontext():
+            self.tick(utc_now())

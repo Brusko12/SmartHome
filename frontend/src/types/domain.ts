@@ -1,4 +1,12 @@
-export type Home = { id: number; name: string; timezone: string };
+export type Home = {
+  id: number;
+  name: string;
+  timezone: string;
+  settings?: {
+    ui_poll_interval: number;
+    demo_choice: "pending" | "created" | "skipped";
+  };
+};
 export type Room = {
   id: number;
   home_id: number;

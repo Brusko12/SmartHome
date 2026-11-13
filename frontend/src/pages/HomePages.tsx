@@ -10,6 +10,10 @@ import {
   Thermometer,
   Trash2,
   Pencil,
+  Sofa,
+  Bed,
+  CookingPot,
+  Bath,
 } from "lucide-react";
 import { useHome } from "../hooks/useHome";
 import { DeviceCard } from "../components/DeviceCard";
@@ -17,6 +21,18 @@ import { Modal } from "../components/Modal";
 import { deviceNames } from "../types/domain";
 import type { Device, DeviceType, Room } from "../types/domain";
 import { QuickScenes } from "./AutomationsPage";
+import { DemoOffer } from "./SystemPages";
+
+function RoomGlyph({ name }: { name: string }) {
+  const Icon =
+    (
+      { sofa: Sofa, bed: Bed, "cooking-pot": CookingPot, bath: Bath } as Record<
+        string,
+        typeof House
+      >
+    )[name] ?? House;
+  return <Icon size={26} />;
+}
 
 export function DashboardPage() {
   const { home, dashboard: d, devices } = useHome();
@@ -31,6 +47,7 @@ export function DashboardPage() {
         </div>
         <span className="local-tag">Локальное управление</span>
       </div>
+      <DemoOffer />
       <div className="stat-grid">
         {[
           [House, "Комнаты", d.rooms],
@@ -85,7 +102,11 @@ export function DashboardPage() {
             <div className="event-line" key={e.id}>
               <span className={`event-dot ${e.status}`} />
               <span>{e.description}</span>
-              <time>{new Date(e.created_at).toLocaleTimeString("ru-RU")}</time>
+              <time>
+                {new Date(e.created_at).toLocaleTimeString("ru-RU", {
+                  timeZone: home.timezone,
+                })}
+              </time>
             </div>
           ))
         ) : (
@@ -261,7 +282,7 @@ export function RoomsPage() {
       <div className="room-grid">
         {rooms.map((r) => (
           <article className="room-card" key={r.id}>
-            <House size={26} />
+            <RoomGlyph name={r.icon} />
             <h2>{r.name}</h2>
             <p className="muted">Устройств: {r.device_count}</p>
             <div className="row">
@@ -379,6 +400,7 @@ function DeviceForm({
           <label>
             Тип устройства
             <select
+              aria-label="Тип устройства"
               value={kind}
               onChange={(e) => setKind(e.target.value as DeviceType)}
             >

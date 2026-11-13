@@ -13,7 +13,7 @@ def test_initial_migration_creates_nine_tables_and_no_demo_users(database):
     assert set(inspect(database.engine).get_table_names()) == set(Base.metadata.tables) | {
         "alembic_version"
     }
-    assert len(Base.metadata.tables) == 9
+    assert len(Base.metadata.tables) == 10
     with database.sessions() as session:
         assert session.scalars(select(User)).all() == []
         assert (

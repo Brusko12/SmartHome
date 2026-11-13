@@ -1,6 +1,7 @@
 from typing import Annotated
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import Field, SecretStr, StringConstraints
+from pydantic import Field, SecretStr, StringConstraints, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -16,12 +17,24 @@ class SetupInput(InputModel):
     username: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
     password: Annotated[SecretStr, Field(min_length=8, max_length=1024)]
     home_name: Name
+    timezone: str = "UTC"
+
+    @field_validator("timezone")
+    @classmethod
+    def valid_zone(cls, value):
+        try:
+            ZoneInfo(value)
+        except (ZoneInfoNotFoundError, ValueError) as error:
+            raise ValueError("Неизвестный часовой пояс.") from error
+        return value
 
 
-def setup_home(session: Session, payload: SetupInput) -> int:
+def setup_home(session: Session, payload: SetupInput, require_new=False) -> int:
     with write_transaction(session):
         existing = session.scalar(select(User).order_by(User.id).limit(1))
         if existing is not None:
+            if require_new:
+                raise Conflict("Локальный пользователь уже настроен. Выполните вход.")
             if existing.username != payload.username or not verify_password(
                 payload.password.get_secret_value(), existing.password_hash
             ):
@@ -39,7 +52,7 @@ def setup_home(session: Session, payload: SetupInput) -> int:
             )
             session.add(user)
             session.flush()
-        home = Home(owner_id=user.id, name=payload.home_name)
+        home = Home(owner_id=user.id, name=payload.home_name, timezone=payload.timezone)
         session.add(home)
         session.flush()
         record_event(

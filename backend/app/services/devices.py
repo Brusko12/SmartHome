@@ -1,5 +1,6 @@
 import json
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.adapters.contracts import DeviceSnapshot
@@ -7,7 +8,7 @@ from app.adapters.registry import AdapterRegistry
 from app.core.errors import Conflict, InvalidCommand
 from app.database.base import utc_now
 from app.database.transactions import write_transaction
-from app.models import Device, DeviceState
+from app.models import Device, DeviceState, EventLog
 from app.repositories import entities as repository
 from app.schemas.devices import STATE_TYPES, DevicePage, DeviceRead, StateRead
 from app.schemas.entities import CommandRequest, DeviceCreate, DevicePatch
@@ -155,6 +156,13 @@ def update_device(
 def delete_device(session: Session, device_id: int) -> None:
     with write_transaction(session):
         device = repository.require_device(session, device_id)
+        for event in session.scalars(select(EventLog).where(EventLog.device_id == device.id)):
+            event.details = {
+                **event.details,
+                "device_id": device.id,
+                "device_name": device.name,
+                "device_type": device.device_type,
+            }
         # The deletion event contains a snapshot, not a soon-to-be-deleted FK.
         record_event(
             session,

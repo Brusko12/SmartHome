@@ -6,6 +6,19 @@ import secrets
 ITERATIONS = 600_000
 
 
+def supported_password_hash(encoded: str) -> bool:
+    try:
+        algorithm, rounds, salt, digest = encoded.split("$")
+        return (
+            algorithm == "pbkdf2_sha256"
+            and ITERATIONS <= int(rounds) <= 2_000_000
+            and len(base64.b64decode(salt, validate=True)) >= 16
+            and len(base64.b64decode(digest, validate=True)) == 32
+        )
+    except (ValueError, TypeError, AttributeError):
+        return False
+
+
 def hash_password(password: str) -> str:
     salt = secrets.token_bytes(32)
     digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, ITERATIONS)

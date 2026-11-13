@@ -290,7 +290,7 @@ export function AutomationsPage() {
               </p>
               <p className="updated">
                 {row.last_run_at
-                  ? `Последний запуск: ${new Date(row.last_run_at).toLocaleString("ru-RU")}`
+                  ? `Последний запуск: ${new Date(row.last_run_at).toLocaleString("ru-RU", { timeZone: home.timezone })}`
                   : "Ещё не запускался"}
               </p>
               <div className="row">

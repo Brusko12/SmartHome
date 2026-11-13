@@ -19,3 +19,11 @@ class InvalidCommand(DomainError):
 
 class Unavailable(DomainError):
     code = "unavailable"
+
+
+class Unauthorized(DomainError):
+    code = "unauthorized"
+
+
+class Forbidden(DomainError):
+    code = "forbidden"
