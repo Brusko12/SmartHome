@@ -5,7 +5,9 @@ Python, Node.js, Git, IDE и терминала. Интерфейс открыв
 как требует ТЗ. Необходимые компоненты включаются PyInstaller в `resources`.
 
 Собирать и проверять Windows EXE следует на Windows; PyInstaller не выполняет
-кросс-компиляцию из Linux. Текущая Linux-проверка не подтверждает Windows-совместимость.
+кросс-компиляцию из Linux. Контрольная Linux-проверка не подтверждает Windows-совместимость.
+Текущая Windows-сборка отдельно проверена на Windows Server 2025 runner.
+[Сборка и отчёт](https://github.com/Brusko12/SmartHome/actions/runs/43391800673).
 
 ## На Windows-сборщике
 

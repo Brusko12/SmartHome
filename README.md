@@ -4,8 +4,8 @@
 [ТЗ v1.0](docs/tz-v1.0.md). React/TypeScript/Vite, Python/FastAPI,
 SQLAlchemy/Alembic и SQLite. Интерфейс открывается в стандартном браузере.
 
-**Этапы 1–6 реализованы и проверены. Windows-сборка подготовлена к проверке;
-готовность Windows EXE и чистой установки пока не подтверждена.**
+**Этапы 1–7 реализованы. Windows EXE собран и прошёл автоматические проверки
+на Windows runner. Остаётся ручная приёмка на чистой Windows 10/11.**
 
 ## Возможности
 
@@ -176,7 +176,10 @@ npm run build
 Сборка должна выполняться на Windows. Описание и команды:
 [docs/windows-build.md](docs/windows-build.md). В GitHub Actions подготовлен
 workflow `Windows portable build`: EXE, проверка запуска и ZIP готовой папки.
-Наличие workflow в исходниках не означает, что сборка уже прошла.
+Проверенная сборка: [скачать артефакт Windows](https://github.com/Brusko12/SmartHome/actions/runs/43391800673/artifacts/14021725477).
+В скачанном артефакте находятся `SmartHome-Windows.zip` и `windows-check.json`.
+Распакуйте внутренний ZIP целиком и запустите `SmartHome-Release/SmartHome.exe`.
+Проверка runner не заменяет приёмку на чистой пользовательской Windows.
 
 ## Структура
 

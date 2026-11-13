@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "platform": "win32",
+  "packaged": true,
+  "static_ui": true,
+  "local_auth": true,
+  "device_command": true,
+  "second_launch_reused": true,
+  "restart_preserved_state": true,
+  "graceful_shutdown": true,
+  "restricted_child_path": true
+}

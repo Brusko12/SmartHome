@@ -4,11 +4,12 @@
 интерфейс, сценарии/правила, расписания/симуляция, локальная авторизация,
 история, настройки, резервные копии и диагностика.
 
-Этап 7: подготовлены launcher, раздача React через FastAPI, PyInstaller spec,
-Windows-скрипт, проверка настоящего процесса и GitHub Actions workflow.
-Windows EXE пока не собран и не проверен в Windows-среде.
+Этап 7 выполнен: launcher, раздача React через FastAPI, PyInstaller spec,
+Windows-скрипт и GitHub Actions workflow. Windows EXE собран и прошёл
+проверку настоящего процесса на Windows Server 2025 runner.
 
-Этап 8: локальные backend, frontend и браузерные проверки выполняются;
+Этап 8: локальные backend, frontend и браузерные проверки пройдены;
+142 backend-теста проходят на Linux и Windows, проверка Windows EXE успешна;
 приёмка чистой Windows и готового Windows-дистрибутива без интернета не выполнена.
 Проект не объявляется полностью завершённым до этих проверок.
 
