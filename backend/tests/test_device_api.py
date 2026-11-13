@@ -329,6 +329,22 @@ def test_nonfinite_input_returns_validation_error_instead_of_server_error(api, r
     assert api.get("/api/devices").json()["total"] == 0
 
 
+def test_dashboard_uses_saved_devices_and_sensor_readings(api, home_id, make_device):
+    lamp = make_device()
+    sensor = make_device("climate_sensor")
+    assert command(api, lamp, "turn_on").status_code == 200
+    assert (
+        command(api, sensor, "simulate_reading", {"temperature": 23.5, "humidity": 40}).status_code
+        == 200
+    )
+    result = api.get(f"/api/dashboard?home_id={home_id}")
+    assert result.status_code == 200
+    assert result.json()["devices"] == 2
+    assert result.json()["powered_devices"] == 1
+    assert result.json()["temperature"] == 23.5
+    assert result.json()["recent_events"]
+
+
 def test_adapter_does_not_mutate_input_or_work_when_disconnected():
     adapter = VirtualDeviceAdapter()
     with pytest.raises(Unavailable):

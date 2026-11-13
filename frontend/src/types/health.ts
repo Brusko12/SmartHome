@@ -1,5 +1,5 @@
 export type Health = {
-  status: 'ok' | 'degraded';
+  status: "ok" | "degraded";
   version: string;
-  database: 'ok' | 'unavailable' | 'migration_required';
+  database: "ok" | "unavailable" | "migration_required";
 };

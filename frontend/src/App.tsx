@@ -1,11 +1,29 @@
-import { Link, Route, Routes } from 'react-router';
-import { FoundationPage } from './pages/FoundationPage';
+import { Link, Route, Routes } from "react-router";
+import { HomeProvider } from "./hooks/useHome";
+import { AppLayout } from "./layouts/AppLayout";
+import { DashboardPage, RoomsPage, DevicesPage } from "./pages/HomePages";
 
 export function App() {
   return (
-    <Routes>
-      <Route path="/" element={<FoundationPage />} />
-      <Route path="*" element={<main className="mx-auto max-w-lg p-10"><h1 className="mb-4 text-2xl">Страница не найдена</h1><Link className="text-violet-300 underline" to="/">На главную</Link></main>} />
-    </Routes>
+    <HomeProvider>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/rooms" element={<RoomsPage />} />
+          <Route path="/devices" element={<DevicesPage />} />
+          <Route
+            path="*"
+            element={
+              <main className="mx-auto max-w-lg p-10">
+                <h1 className="mb-4 text-2xl">Страница не найдена</h1>
+                <Link className="text-violet-300 underline" to="/">
+                  На главную
+                </Link>
+              </main>
+            }
+          />
+        </Route>
+      </Routes>
+    </HomeProvider>
   );
 }
