@@ -34,6 +34,7 @@ class Budget:
 class ExecutionContext:
     path: tuple[int, ...] = ()
     budget: Budget = field(default_factory=Budget)
+    source: str = "automation"
 
 
 def conditions_match(session: Session, conditions) -> bool:
@@ -69,6 +70,7 @@ def execute(
     automation_id: int,
     reason="manual",
     context: ExecutionContext | None = None,
+    run_at=None,
 ) -> ExecutionResult:
     context = context or ExecutionContext()
     result = ExecutionResult(automation_id=automation_id, status="skipped", reason=reason)
@@ -102,7 +104,7 @@ def execute(
                 details={"automation_id": row.id},
             )
             return result
-        now = utc_now()
+        now = run_at or utc_now()
         if (
             reason.startswith("device:")
             and row.last_run_at
@@ -121,60 +123,9 @@ def execute(
             details={"automation_id": row.id, "reason": reason, "path": list(context.path)},
         )
     child = ExecutionContext(context.path + (automation_id,), context.budget)
-    failed = False
-    for index, action in enumerate(payload.actions):
-        if failed:
-            result.actions.append(
-                ActionResult(
-                    index=index,
-                    status="skipped",
-                    message="Предыдущее действие завершилось ошибкой.",
-                )
-            )
-            continue
-        try:
-            if child.budget.remaining <= 0:
-                raise InvalidCommand("Превышен общий лимит 64 действий и запусков.")
-            child.budget.remaining -= 1
-            if isinstance(action, CommandAction):
-                from app.services.devices import execute_command
-
-                with Session(bind=bind, expire_on_commit=False) as session:
-                    execute_command(
-                        session,
-                        adapters,
-                        action.device_id,
-                        CommandRequest(command=action.command, params=action.params),
-                        context=child,
-                    )
-            else:
-                nested = execute(
-                    bind, adapters, action.automation_id, f"scenario:{automation_id}", child
-                )
-                if nested.status != "success":
-                    raise InvalidCommand(f"Вложенный сценарий: {nested.reason} ({nested.status}).")
-            result.actions.append(ActionResult(index=index, status="success"))
-        except NotFound as error:
-            if action.optional:
-                result.actions.append(
-                    ActionResult(index=index, status="skipped", message=str(error))
-                )
-            else:
-                failed = True
-                result.actions.append(ActionResult(index=index, status="error", message=str(error)))
-        except DomainError as error:
-            failed = True
-            result.actions.append(ActionResult(index=index, status="error", message=str(error)))
-        except Exception:
-            logger.exception("Automation action failed")
-            failed = True
-            result.actions.append(
-                ActionResult(
-                    index=index,
-                    status="error",
-                    message="Ошибка выполнения действия; подробности в журнале сервера.",
-                )
-            )
+    result.actions, failed = perform_actions(
+        bind, adapters, payload.actions, child, f"scenario:{automation_id}"
+    )
     result.status = (
         ("partial" if any(r.status == "success" for r in result.actions) else "error")
         if failed
@@ -268,3 +219,59 @@ def process_change(
                     )
             except Exception:
                 logger.exception("Could not persist automation failure")
+
+
+def perform_actions(bind, adapters, actions, context=None, reason="schedule"):
+    context = context or ExecutionContext()
+    steps = []
+    failed = False
+    for index, action in enumerate(actions):
+        if failed:
+            steps.append(
+                ActionResult(
+                    index=index,
+                    status="skipped",
+                    message="Предыдущее действие завершилось ошибкой.",
+                )
+            )
+            continue
+        try:
+            if context.budget.remaining <= 0:
+                raise InvalidCommand("Превышен общий лимит 64 действий и запусков.")
+            context.budget.remaining -= 1
+            if isinstance(action, CommandAction):
+                from app.services.devices import execute_command
+
+                with Session(bind=bind, expire_on_commit=False) as session:
+                    execute_command(
+                        session,
+                        adapters,
+                        action.device_id,
+                        CommandRequest(command=action.command, params=action.params),
+                        context=context,
+                    )
+            else:
+                nested = execute(bind, adapters, action.automation_id, reason, context)
+                if nested.status != "success":
+                    raise InvalidCommand(f"Вложенный сценарий: {nested.reason} ({nested.status}).")
+            steps.append(ActionResult(index=index, status="success"))
+        except NotFound as error:
+            if action.optional:
+                steps.append(ActionResult(index=index, status="skipped", message=str(error)))
+            else:
+                failed = True
+                steps.append(ActionResult(index=index, status="error", message=str(error)))
+        except DomainError as error:
+            failed = True
+            steps.append(ActionResult(index=index, status="error", message=str(error)))
+        except Exception:
+            logger.exception("Automation action failed")
+            failed = True
+            steps.append(
+                ActionResult(
+                    index=index,
+                    status="error",
+                    message="Ошибка выполнения действия; подробности в журнале сервера.",
+                )
+            )
+    return steps, failed

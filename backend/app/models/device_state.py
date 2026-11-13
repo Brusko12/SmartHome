@@ -1,9 +1,10 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database.base import Base, Entity
+from app.database.base import Base, Entity, UTCDateTime, utc_now
 from app.schemas.json_data import ObjectJSON
 
 if TYPE_CHECKING:
@@ -19,4 +20,5 @@ class DeviceState(Entity, Base):
     )
     values: Mapped[dict] = mapped_column(ObjectJSON(), default=dict)
     source: Mapped[str] = mapped_column(String(50), default="initialization")
+    simulated_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), default=utc_now)
     device: Mapped["Device"] = relationship(back_populates="state")

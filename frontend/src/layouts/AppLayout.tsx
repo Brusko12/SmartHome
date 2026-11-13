@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   RefreshCw,
   Zap,
+  Clock,
 } from "lucide-react";
 import { useHome } from "../hooks/useHome";
 export function AppLayout() {
@@ -38,6 +39,10 @@ export function AppLayout() {
           <NavLink to="/automations">
             <Zap size={19} />
             Сценарии и правила
+          </NavLink>
+          <NavLink to="/schedules">
+            <Clock size={19} />
+            Расписания
           </NavLink>
         </nav>
         <div className="sidebar-bottom">

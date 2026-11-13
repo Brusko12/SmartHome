@@ -17,7 +17,8 @@ def test_initial_migration_creates_nine_tables_and_no_demo_users(database):
     with database.sessions() as session:
         assert session.scalars(select(User)).all() == []
         assert (
-            session.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == "0001"
+            session.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+            == expected_revision()
         )
         assert session.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
 
@@ -55,3 +56,18 @@ def test_empty_database_downgrade_and_upgrade(database):
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
             == expected_revision()
         )
+
+
+def test_upgrade_existing_settings_revision_retains_devices_and_states(database, graph, settings):
+    config = migration_config()
+    with database.engine.begin() as connection:
+        config.attributes["connection"] = connection
+        command.downgrade(config, "0002")
+        assert "simulated_at" not in {
+            c["name"] for c in inspect(connection).get_columns("device_states")
+        }
+    initialize_database(settings, database)
+    with database.sessions() as session:
+        device = session.get(Device, graph.device_id)
+        assert device.state.values == {"power": True, "brightness": 60}
+        assert device.name == "Лампа"

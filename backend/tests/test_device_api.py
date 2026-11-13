@@ -23,7 +23,7 @@ def api(settings):
             user = User(username="api-test", password_hash="$test$not-a-real-password")
             session.add(user)
             session.flush()
-            home = Home(owner_id=user.id, name="Дом")
+            home = Home(owner_id=user.id, name="Дом", settings={"simulation_enabled": False})
             session.add(home)
             session.flush()
             client.app.state.test_home_id = home.id

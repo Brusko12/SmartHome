@@ -120,7 +120,9 @@ export function ActionsEditor({
                         device_id: devices[0]?.id ?? 0,
                         command:
                           commands[devices[0]?.device_type ?? "light"][0],
-                        params: defaults(commands[devices[0]?.device_type ?? "light"][0]),
+                        params: defaults(
+                          commands[devices[0]?.device_type ?? "light"][0],
+                        ),
                       },
                 )
               }

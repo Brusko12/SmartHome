@@ -4,6 +4,7 @@ from sqlalchemy import CheckConstraint, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base, Entity
+from app.schemas.json_data import ObjectJSON
 
 if TYPE_CHECKING:
     from app.models import Automation, Device, EventLog, Integration, Room, Schedule, User
@@ -19,6 +20,7 @@ class Home(Entity, Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     name: Mapped[str] = mapped_column(String(200))
     timezone: Mapped[str] = mapped_column(String(64), default="UTC")
+    settings: Mapped[dict] = mapped_column(ObjectJSON(), default=dict, server_default="{}")
     owner: Mapped["User"] = relationship(back_populates="homes")
     rooms: Mapped[list["Room"]] = relationship(back_populates="home", passive_deletes="all")
     devices: Mapped[list["Device"]] = relationship(back_populates="home", passive_deletes="all")

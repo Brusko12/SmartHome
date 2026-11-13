@@ -15,6 +15,7 @@ dist/
 build/
 *.db
 *.db-*
+*.db.lock
 *.sqlite*
 *.log
 .DS_Store

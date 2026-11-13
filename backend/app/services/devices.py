@@ -128,6 +128,11 @@ def update_device(
             changes["parameters"] = adapter.validate_parameters(
                 device.device_type, changes["parameters"]
             )
+            from app.services.simulation import settle
+
+            now = utc_now()
+            device.state.values = settle(device, adapter.get_state(snapshot(device)), now)
+            device.state.simulated_at = now
         for key, value in changes.items():
             setattr(device, key, value)
         if "parameters" in changes:
@@ -185,10 +190,17 @@ def execute_command(
             if payload.command in {"simulate_motion", "reset_motion", "simulate_reading"}
             else "user"
         )
-        if context is not None and context.path:
-            source = "automation"
+        if context is not None:
+            source = context.source
         try:
-            after = adapter.execute_command(snapshot(device), payload.command, payload.params, now)
+            from app.services.simulation import settle
+
+            settled = settle(device, before, now)
+            current = snapshot(device)
+            current = DeviceSnapshot(
+                current.device_id, current.device_type, current.parameters, settled
+            )
+            after = adapter.execute_command(current, payload.command, payload.params, now)
         except InvalidCommand as error:
             failure = error
             record_event(
@@ -209,6 +221,7 @@ def execute_command(
             device.state.values = after
             device.state.source = source
             device.state.updated_at = now
+            device.state.simulated_at = now
             device.updated_at = now
             record_event(
                 session,

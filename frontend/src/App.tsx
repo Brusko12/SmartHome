@@ -3,6 +3,7 @@ import { HomeProvider } from "./hooks/useHome";
 import { AppLayout } from "./layouts/AppLayout";
 import { DashboardPage, RoomsPage, DevicesPage } from "./pages/HomePages";
 import { AutomationsPage } from "./pages/AutomationsPage";
+import { SchedulesPage } from "./pages/SchedulesPage";
 
 export function App() {
   return (
@@ -13,6 +14,7 @@ export function App() {
           <Route path="/rooms" element={<RoomsPage />} />
           <Route path="/devices" element={<DevicesPage />} />
           <Route path="/automations" element={<AutomationsPage />} />
+          <Route path="/schedules" element={<SchedulesPage />} />
           <Route
             path="*"
             element={

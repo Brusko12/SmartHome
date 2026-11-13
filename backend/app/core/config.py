@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     data_dir: Path = Field(default_factory=default_data_dir)
     port: int = Field(default=8000, ge=1024, le=65535)
     log_level: Literal["debug", "info", "warning", "error", "critical"] = "info"
+    background_tasks: bool = True
 
     @field_validator("data_dir")
     @classmethod
